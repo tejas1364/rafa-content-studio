@@ -15,10 +15,10 @@
           <p class="subtle">Scan the iCloud album, generate one daily batch, then review exactly 4 complete post drafts: 3 videos and 1 slideshow.</p>
         </div>
         <div class="hero-actions">
-          <form method="post" action="/api/scan">
+          <form method="post" action="/scan">
             <button type="submit">Scan iCloud Album</button>
           </form>
-          <form method="post" action="/api/batches/generate" class="trend-form">
+          <form method="post" action="/generate-batch" class="trend-form">
             <label for="trends_text">Today's researched trend ideas</label>
             <textarea id="trends_text" name="trends_text" rows="5" placeholder="Paste four trend ideas, one per line. If blank, the MVP defaults are used."></textarea>
             <button type="submit">Generate Today's Batch</button>

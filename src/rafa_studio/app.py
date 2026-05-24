@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -53,11 +53,26 @@ def create_app(settings: StudioSettings | None = None, store: ContentStore | Non
             },
         )
 
+    @app.post("/scan")
+    def scan_from_dashboard() -> RedirectResponse:
+        assets = scan_media_directory(settings.media_path)
+        store.upsert_assets(assets)
+        return RedirectResponse(url="/", status_code=303)
+
     @app.post("/api/scan")
     def scan() -> dict[str, int | str]:
         assets = scan_media_directory(settings.media_path)
         imported = store.upsert_assets(assets)
         return {"assets_imported": imported, "media_dir": str(settings.media_path)}
+
+    @app.post("/generate-batch")
+    def generate_batch_from_dashboard(trends_text: str = Form(default="")) -> RedirectResponse:
+        trends = _parse_trends_text(trends_text)
+        try:
+            generate_daily_batch(store, ManualTrendProvider(trends))
+        except ValueError as error:
+            raise HTTPException(status_code=400, detail=str(error))
+        return RedirectResponse(url="/", status_code=303)
 
     @app.post("/api/batches/generate")
     def generate_batch(trends_text: str = Form(default="")) -> dict[str, str | int]:

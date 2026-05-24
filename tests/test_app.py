@@ -42,6 +42,27 @@ def test_dashboard_shows_media_library_without_creating_drafts_on_scan(tmp_path:
     assert store.list_drafts() == []
 
 
+def test_dashboard_scan_action_redirects_back_to_dashboard(tmp_path: Path):
+    client, store = make_client(tmp_path)
+
+    response = client.post("/scan", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/"
+    assert len(store.list_assets()) == 6
+
+
+def test_dashboard_generate_action_redirects_back_to_dashboard(tmp_path: Path):
+    client, store = make_client(tmp_path)
+    client.post("/api/scan")
+
+    response = client.post("/generate-batch", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"] == "/"
+    assert len(store.list_post_drafts()) == 4
+
+
 def test_generate_batch_endpoint_creates_reviewable_post_drafts(tmp_path: Path):
     client, store = make_client(tmp_path)
     client.post("/api/scan")
