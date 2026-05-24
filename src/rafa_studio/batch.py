@@ -8,10 +8,18 @@ from .models import ContentBatch, PostDraft, TrendIdea
 from .store import ContentStore
 
 DEFAULT_HASHTAGS = ["#rafa", "#dogsoftiktok", "#dogreels", "#puppylife"]
+DEFAULT_TRENDS = [
+    "POV: tiny dog thinks he owns the house",
+    "Weekend photo dump but make it tiny",
+    "Suspiciously quiet puppy check",
+    "When the zoomies choose you",
+    "Tiny dog cinematic universe",
+    "Rafa discovers a side quest",
+]
 
 
 class TrendProvider(Protocol):
-    def top_trends(self, limit: int = 4) -> list[TrendIdea]:
+    def top_trends(self, limit: int = 6) -> list[TrendIdea]:
         """Return structured trend ideas for today's batch."""
         ...
 
@@ -22,19 +30,14 @@ class ManualTrendProvider:
 
     titles: list[str] | None = None
 
-    def top_trends(self, limit: int = 4) -> list[TrendIdea]:
-        titles = self.titles or [
-            "POV: tiny dog thinks he owns the house",
-            "When the zoomies choose you",
-            "Suspiciously quiet puppy check",
-            "Weekend photo dump but make it tiny",
-        ]
+    def top_trends(self, limit: int = 6) -> list[TrendIdea]:
+        titles = self.titles or DEFAULT_TRENDS
         return [
             TrendIdea(
                 id=f"trend-{index + 1}",
                 title=title,
-                platform="instagram,tiktok",
-                format_hint="slideshow" if index == 3 else "short vertical video",
+                platform="instagram" if index < 3 else "instagram,tiktok",
+                format_hint="photo post" if index < 3 else "short vertical video",
                 caption_angle=_caption_angle(title),
                 hashtags=_hashtags_for(title),
             )
@@ -46,19 +49,19 @@ def generate_daily_batch(
     store: ContentStore,
     trend_provider: TrendProvider | None = None,
 ) -> ContentBatch:
-    """Create exactly four human-reviewable posts: three videos and one slideshow."""
+    """Create exactly six human-reviewable posts: three photos and three videos."""
 
-    trends = (trend_provider or ManualTrendProvider()).top_trends(limit=4)
-    if len(trends) < 4:
-        raise ValueError("Daily batch generation needs 4 trend ideas")
+    trends = (trend_provider or ManualTrendProvider()).top_trends(limit=6)
+    if len(trends) < 6:
+        raise ValueError("Daily batch generation needs 6 trend ideas")
 
     assets = store.list_assets()
-    videos = [asset for asset in assets if asset["media_type"] == "video"]
     photos = [asset for asset in assets if asset["media_type"] == "photo"]
-    if len(videos) < 3 or len(photos) < 3:
+    videos = [asset for asset in assets if asset["media_type"] == "video"]
+    if len(photos) < 3 or len(videos) < 3:
         raise ValueError(
-            "Daily batch generation needs at least 3 videos and 3 photos "
-            f"(found {len(videos)} videos and {len(photos)} photos)"
+            "Daily batch generation needs at least 3 photos and 3 videos "
+            f"(found {len(photos)} photos and {len(videos)} videos)"
         )
 
     created_at = time.time()
@@ -66,11 +69,32 @@ def generate_daily_batch(
         id=f"batch-{int(created_at)}",
         created_at=created_at,
         status="draft",
-        target_post_count=4,
+        target_post_count=6,
     )
     store.create_batch(batch)
 
-    for index, video_asset in enumerate(videos[:3], start=1):
+    for index, photo_asset in enumerate(photos[:3], start=1):
+        trend = trends[index - 1]
+        store.add_post_draft(
+            PostDraft(
+                id=f"{batch.id}-post-{index}",
+                batch_id=batch.id,
+                post_type="photo",
+                platform_targets=["instagram"],
+                trend_title=trend.title,
+                caption=_caption_for_photo(trend.title),
+                hashtags=trend.hashtags,
+                selected_asset_ids=[str(photo_asset["asset_id"])],
+                overlay_text=_overlay_for(trend.title),
+                edit_notes=(
+                    "Use as an Instagram picture post. Keep the image uncropped if possible, "
+                    "and make Rafa's face or expression the first visual read."
+                ),
+            )
+        )
+
+    for offset, video_asset in enumerate(videos[:3], start=1):
+        index = offset + 3
         trend = trends[index - 1]
         store.add_post_draft(
             PostDraft(
@@ -84,27 +108,11 @@ def generate_daily_batch(
                 selected_asset_ids=[str(video_asset["asset_id"])],
                 overlay_text=_overlay_for(trend.title),
                 edit_notes=(
-                    "Use this as a short vertical reel. Trim to the strongest 7-12 seconds, "
-                    "keep Rafa visible early, and pair with a current upbeat or playful sound."
+                    "Use this as a short vertical Reel/TikTok. Trim to the strongest 7-12 seconds, "
+                    "keep Rafa visible early, and pair with a current playful sound."
                 ),
             )
         )
-
-    slideshow_trend = trends[3]
-    store.add_post_draft(
-        PostDraft(
-            id=f"{batch.id}-post-4",
-            batch_id=batch.id,
-            post_type="slideshow",
-            platform_targets=["instagram", "tiktok"],
-            trend_title=slideshow_trend.title,
-            caption=_caption_for_slideshow(slideshow_trend.title),
-            hashtags=slideshow_trend.hashtags,
-            selected_asset_ids=[str(asset["asset_id"]) for asset in photos[:3]],
-            overlay_text=["Rafa photo dump", "tiny moments", "main character archive"],
-            edit_notes="Use 3-8 photos as a carousel/slideshow. Keep the cutest face-forward image first.",
-        )
-    )
 
     return batch
 
@@ -117,7 +125,9 @@ def _caption_angle(title: str) -> str:
         return "high-energy puppy chaos"
     if "quiet" in lowered or "suspicious" in lowered:
         return "the suspicious silence every dog owner recognizes"
-    return "soft photo-dump storytelling from Rafa's day"
+    if "photo" in lowered or "dump" in lowered:
+        return "soft photo-post storytelling from Rafa's day"
+    return "playful tiny-dog story with a simple hook"
 
 
 def _hashtags_for(title: str) -> list[str]:
@@ -129,15 +139,17 @@ def _hashtags_for(title: str) -> list[str]:
         tags.append("#zoomies")
     if "photo" in lowered or "dump" in lowered:
         tags.append("#photodump")
+    if "side quest" in lowered:
+        tags.append("#sidequest")
     return tags
+
+
+def _caption_for_photo(title: str) -> str:
+    return f"{title}. Rafa had one job: be tiny and somehow still run the whole frame."
 
 
 def _caption_for_video(title: str) -> str:
     return f"{title}. Rafa understood the assignment and then rewrote it in his favor."
-
-
-def _caption_for_slideshow(title: str) -> str:
-    return f"{title}. A tiny archive of Rafa moments that felt too important not to post."
 
 
 def _overlay_for(title: str) -> list[str]:

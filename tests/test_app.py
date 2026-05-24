@@ -60,7 +60,7 @@ def test_dashboard_generate_action_redirects_back_to_dashboard(tmp_path: Path):
 
     assert response.status_code == 303
     assert response.headers["location"] == "/"
-    assert len(store.list_post_drafts()) == 4
+    assert len(store.list_post_drafts()) == 6
 
 
 def test_generate_batch_endpoint_creates_reviewable_post_drafts(tmp_path: Path):
@@ -70,11 +70,11 @@ def test_generate_batch_endpoint_creates_reviewable_post_drafts(tmp_path: Path):
     response = client.post("/api/batches/generate")
 
     assert response.status_code == 200
-    assert response.json()["target_post_count"] == 4
+    assert response.json()["target_post_count"] == 6
     posts = store.list_post_drafts(response.json()["id"])
-    assert len(posts) == 4
+    assert len(posts) == 6
     assert [post.post_type for post in posts].count("video") == 3
-    assert [post.post_type for post in posts].count("slideshow") == 1
+    assert [post.post_type for post in posts].count("photo") == 3
 
 
 def test_generate_batch_accepts_researched_trends_from_dashboard_form(tmp_path: Path):
@@ -90,6 +90,8 @@ def test_generate_batch_accepts_researched_trends_from_dashboard_form(tmp_path: 
                     "Zoomies chose violence today",
                     "Quiet puppy suspicious activity",
                     "Sunday Rafa photo dump",
+                    "Tiny cinematic universe",
+                    "Rafa side quest",
                 ]
             )
         },
@@ -102,6 +104,8 @@ def test_generate_batch_accepts_researched_trends_from_dashboard_form(tmp_path: 
         "Zoomies chose violence today",
         "Quiet puppy suspicious activity",
         "Sunday Rafa photo dump",
+        "Tiny cinematic universe",
+        "Rafa side quest",
     ]
 
 

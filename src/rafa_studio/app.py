@@ -216,7 +216,7 @@ def _legacy_draft_to_response(store: ContentStore, draft_id: str, status: str) -
 
 def _parse_trends_text(trends_text: str) -> list[str] | None:
     trends = [line.strip(" -\t") for line in trends_text.splitlines() if line.strip(" -\t")]
-    return trends[:4] or None
+    return trends[:6] or None
 
 
 @lru_cache(maxsize=1)

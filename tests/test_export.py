@@ -26,7 +26,7 @@ def seed_store(tmp_path: Path) -> ContentStore:
     store.upsert_assets([MediaAsset.from_path(path, media_dir) for path in media_dir.iterdir()])
     batch = generate_daily_batch(
         store,
-        ManualTrendProvider(["one", "two", "three", "slideshow"]),
+        ManualTrendProvider(["photo one", "photo two", "photo three", "video one", "video two", "video three"]),
     )
     posts = store.list_post_drafts(batch.id)
     store.set_post_caption(posts[0].id, "Approved Rafa caption")
@@ -43,7 +43,7 @@ def test_export_approved_drafts_writes_json(tmp_path: Path):
 
     assert result.count == 1
     data = json.loads(output.read_text())
-    assert data[0]["post_type"] == "video"
+    assert data[0]["post_type"] == "photo"
     assert data[0]["caption"] == "Approved Rafa caption"
     assert data[0]["status"] == "approved"
 
@@ -56,6 +56,6 @@ def test_export_approved_drafts_writes_csv(tmp_path: Path):
 
     assert result.count == 1
     rows = list(csv.DictReader(output.read_text().splitlines()))
-    assert rows[0]["post_type"] == "video"
+    assert rows[0]["post_type"] == "photo"
     assert rows[0]["caption"] == "Approved Rafa caption"
     assert rows[0]["status"] == "approved"
