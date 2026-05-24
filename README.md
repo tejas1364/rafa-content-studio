@@ -6,8 +6,10 @@ Local-first MVP for turning a Rafa iCloud album folder into reviewable content d
 
 - Scans a local folder that represents the Rafa iCloud album on the MacBook.
 - Imports supported media files: `.jpg`, `.jpeg`, `.png`, `.heic`, `.webp`, `.mov`, `.mp4`, `.m4v`.
-- Creates one pending draft caption per imported asset.
-- Provides a browser dashboard to approve, reject, or inspect drafts.
+- Maintains a media library without creating one fake draft per file.
+- Generates one daily review batch with exactly 4 complete post drafts: 3 video posts and 1 slideshow post.
+- Uses structured MVP trend ideas now, with a manual trend-input path ready for research-driven ideas next.
+- Provides a browser dashboard to approve, reject, or inspect post drafts.
 - Stores state locally in SQLite.
 
 ## Run locally
@@ -51,9 +53,32 @@ export RAFA_THUMBNAIL_DIR="$HOME/.rafa-content-studio/thumbnails"
 export RAFA_EXPORT_DIR="$HOME/.rafa-content-studio/exports"
 ```
 
+## Generate today's batch
+
+After scanning, generate the four-post daily batch from the dashboard with **Generate Today's Batch**.
+
+From the CLI:
+
+```bash
+rafa-studio scan
+rafa-studio generate-batch
+```
+
+To pass manually researched trend ideas into the MVP generator:
+
+```bash
+rafa-studio generate-batch \
+  --trend "POV: tiny dog thinks he owns the house" \
+  --trend "When the zoomies choose you" \
+  --trend "Suspiciously quiet puppy check" \
+  --trend "Weekend photo dump but make it tiny"
+```
+
+The generator requires at least 3 videos and 3 photos. It creates exactly 3 video posts and 1 slideshow post for human approval.
+
 ## Export approved drafts
 
-From the dashboard, use **Export JSON** or **Export CSV** after approving drafts.
+From the dashboard, use **Export JSON** or **Export CSV** after approving post drafts.
 
 From the CLI:
 

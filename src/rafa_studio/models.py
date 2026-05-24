@@ -45,3 +45,36 @@ class ContentDraft:
     asset_id: str
     caption: str
     status: str = "pending"
+
+
+@dataclass(frozen=True)
+class TrendIdea:
+    id: str
+    title: str
+    platform: str
+    format_hint: str
+    caption_angle: str
+    hashtags: list[str]
+
+
+@dataclass(frozen=True)
+class ContentBatch:
+    id: str
+    created_at: float
+    status: str
+    target_post_count: int = 4
+
+
+@dataclass(frozen=True)
+class PostDraft:
+    id: str
+    batch_id: str
+    post_type: str
+    platform_targets: list[str]
+    trend_title: str
+    caption: str
+    hashtags: list[str]
+    selected_asset_ids: list[str]
+    overlay_text: list[str]
+    edit_notes: str
+    status: str = "pending"

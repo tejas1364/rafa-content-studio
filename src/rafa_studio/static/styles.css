@@ -94,6 +94,14 @@ button:hover, .button:hover {
   padding: 16px 20px;
 }
 
+.section-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 28px 0 14px;
+}
+
 code {
   background: #fff3e8;
   border-radius: 8px;
@@ -123,6 +131,38 @@ code {
 
 .thumb.video {
   background: #c1d7c7;
+}
+
+.post-card {
+  grid-template-columns: 180px 1fr;
+}
+
+.post-preview-strip {
+  background: #f4dcc8;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  padding: 8px;
+}
+
+.thumb.mini {
+  border-radius: 14px;
+  min-height: 96px;
+}
+
+.selected-assets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.library-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.library-card {
+  grid-template-columns: 96px 1fr;
 }
 
 .card-body {

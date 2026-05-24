@@ -12,11 +12,14 @@
         <div>
           <p class="eyebrow">Local-first MVP</p>
           <h1>Rafa Content Studio</h1>
-          <p class="subtle">Scan an iCloud album folder, generate draft captions, then approve or reject posts before anything goes live.</p>
+          <p class="subtle">Scan the iCloud album, generate one daily batch, then review exactly 4 complete post drafts: 3 videos and 1 slideshow.</p>
         </div>
         <div class="hero-actions">
           <form method="post" action="/api/scan">
             <button type="submit">Scan iCloud Album</button>
+          </form>
+          <form method="post" action="/api/batches/generate">
+            <button type="submit">Generate Today's Batch</button>
           </form>
           <a class="button secondary" href="/exports/approved.json">Export JSON</a>
           <a class="button secondary" href="/exports/approved.csv">Export CSV</a>
@@ -28,25 +31,72 @@
         <code>{{ settings.media_dir }}</code>
       </section>
 
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">Daily batch</p>
+          <h2>{% if batch %}{{ batch.id }}{% else %}No batch generated yet{% endif %}</h2>
+        </div>
+        <p class="subtle">The main queue only shows complete post drafts. The media library below is reference material, not the posting queue.</p>
+      </section>
+
       <section class="grid">
-        {% for item in items %}
-          <article class="card">
+        {% for post in posts %}
+          <article class="card post-card">
+            <div class="post-preview-strip">
+              {% for asset in post.selected_assets %}
+                <img class="thumb mini {{ asset.media_type }}" src="{{ asset.thumbnail_url }}" alt="Preview for {{ asset.filename }}">
+              {% endfor %}
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <h2>{{ post.post_type | title }} Post</h2>
+                <span class="status {{ post.status }}">{{ post.status | title }}</span>
+              </div>
+              <p class="path">Trend: {{ post.trend_title }}</p>
+              <p class="caption">{{ post.caption }}</p>
+              <p class="path">{{ post.hashtags | join(' ') }}</p>
+              <p class="path"><strong>Overlay:</strong> {{ post.overlay_text | join(' / ') }}</p>
+              <p class="path"><strong>Edit notes:</strong> {{ post.edit_notes }}</p>
+              <div class="selected-assets">
+                {% for asset in post.selected_assets %}
+                  <code>{{ asset.filename }}</code>
+                {% endfor %}
+              </div>
+              <div class="actions">
+                <form method="post" action="/api/posts/{{ post.id }}/approve">
+                  <button class="approve" type="submit">Approve</button>
+                </form>
+                <form method="post" action="/api/posts/{{ post.id }}/reject">
+                  <button class="reject" type="submit">Reject</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% else %}
+          <article class="empty">
+            <h2>No post drafts yet</h2>
+            <p>Scan the iCloud album, then generate today's batch. The generator needs at least 3 videos and 3 photos.</p>
+          </article>
+        {% endfor %}
+      </section>
+
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">Media library</p>
+          <h2>{{ assets | length }} scanned assets</h2>
+        </div>
+      </section>
+
+      <section class="grid library-grid">
+        {% for item in assets %}
+          <article class="card library-card">
             <img class="thumb {{ item.media_type }}" src="{{ item.thumbnail_url }}" alt="Preview for {{ item.filename }}">
             <div class="card-body">
               <div class="row">
                 <h2>{{ item.filename }}</h2>
-                <span class="status {{ item.status }}">{{ item.status | title }}</span>
+                <span class="status pending">{{ item.media_type | title }}</span>
               </div>
               <p class="path">{{ item.relative_path }}</p>
-              <p class="caption">{{ item.caption }}</p>
-              <div class="actions">
-                <form method="post" action="/api/drafts/{{ item.draft_id }}/approve">
-                  <button class="approve" type="submit">Approve</button>
-                </form>
-                <form method="post" action="/api/drafts/{{ item.draft_id }}/reject">
-                  <button class="reject" type="submit">Reject</button>
-                </form>
-              </div>
             </div>
           </article>
         {% else %}

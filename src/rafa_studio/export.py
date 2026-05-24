@@ -33,12 +33,15 @@ def export_approved_drafts(
     elif format == "csv":
         fieldnames = [
             "draft_id",
-            "asset_id",
-            "filename",
-            "absolute_path",
-            "relative_path",
-            "media_type",
+            "batch_id",
+            "post_type",
+            "platform_targets",
+            "trend_title",
             "caption",
+            "hashtags",
+            "selected_asset_ids",
+            "overlay_text",
+            "edit_notes",
             "status",
         ]
         with output.open("w", encoding="utf-8", newline="") as handle:
