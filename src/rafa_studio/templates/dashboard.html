@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rafa Content Studio</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Local-first MVP</p>
+          <h1>Rafa Content Studio</h1>
+          <p class="subtle">Scan an iCloud album folder, generate draft captions, then approve or reject posts before anything goes live.</p>
+        </div>
+        <form method="post" action="/api/scan">
+          <button type="submit">Scan iCloud Album</button>
+        </form>
+      </section>
+
+      <section class="config-card">
+        <strong>Watched folder:</strong>
+        <code>{{ settings.media_dir }}</code>
+      </section>
+
+      <section class="grid">
+        {% for item in items %}
+          <article class="card">
+            <div class="thumb {{ item.media_type }}">{{ item.media_type }}</div>
+            <div class="card-body">
+              <div class="row">
+                <h2>{{ item.filename }}</h2>
+                <span class="status {{ item.status }}">{{ item.status | title }}</span>
+              </div>
+              <p class="path">{{ item.relative_path }}</p>
+              <p class="caption">{{ item.caption }}</p>
+              <div class="actions">
+                <form method="post" action="/api/drafts/{{ item.draft_id }}/approve">
+                  <button class="approve" type="submit">Approve</button>
+                </form>
+                <form method="post" action="/api/drafts/{{ item.draft_id }}/reject">
+                  <button class="reject" type="submit">Reject</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% else %}
+          <article class="empty">
+            <h2>No media scanned yet</h2>
+            <p>Set <code>RAFA_MEDIA_DIR</code> to the local iCloud album folder on the MacBook, then scan.</p>
+          </article>
+        {% endfor %}
+      </section>
+    </main>
+  </body>
+</html>
