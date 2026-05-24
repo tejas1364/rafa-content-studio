@@ -52,18 +52,35 @@ h2 {
   color: #705b4c;
 }
 
-button {
+button, .button {
+  align-items: center;
   background: #211914;
   border: 0;
   border-radius: 999px;
   color: white;
   cursor: pointer;
+  display: inline-flex;
   font-weight: 800;
+  justify-content: center;
   padding: 12px 18px;
+  text-decoration: none;
 }
 
-button:hover {
+button:hover, .button:hover {
   transform: translateY(-1px);
+}
+
+.button.secondary {
+  background: #fffaf5;
+  border: 1px solid #dcb99f;
+  color: #5f341c;
+}
+
+.hero-actions {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .config-card, .empty, .card {
@@ -96,20 +113,16 @@ code {
 }
 
 .thumb {
-  align-items: center;
   background: #dbb99e;
-  color: #5f341c;
-  display: flex;
-  font-size: 0.8rem;
-  font-weight: 900;
-  justify-content: center;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  display: block;
+  height: 100%;
+  min-height: 180px;
+  object-fit: cover;
+  width: 100%;
 }
 
 .thumb.video {
   background: #c1d7c7;
-  color: #284932;
 }
 
 .card-body {

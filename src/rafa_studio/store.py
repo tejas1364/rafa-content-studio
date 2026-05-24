@@ -86,6 +86,7 @@ class ContentStore:
                 SELECT
                     assets.id AS asset_id,
                     assets.filename,
+                    assets.absolute_path,
                     assets.relative_path,
                     assets.media_type,
                     assets.size_bytes,
@@ -96,6 +97,28 @@ class ContentStore:
                 LEFT JOIN drafts ON drafts.asset_id = assets.id
                 ORDER BY assets.relative_path COLLATE NOCASE
                 """
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_drafts_for_export(self, status: str = "approved") -> list[dict[str, str | int | float]]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    drafts.id AS draft_id,
+                    assets.id AS asset_id,
+                    assets.filename,
+                    assets.absolute_path,
+                    assets.relative_path,
+                    assets.media_type,
+                    drafts.caption,
+                    drafts.status
+                FROM drafts
+                JOIN assets ON assets.id = drafts.asset_id
+                WHERE drafts.status = ?
+                ORDER BY assets.relative_path COLLATE NOCASE
+                """,
+                (status,),
             ).fetchall()
         return [dict(row) for row in rows]
 

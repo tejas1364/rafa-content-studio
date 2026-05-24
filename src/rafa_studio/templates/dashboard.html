@@ -14,9 +14,13 @@
           <h1>Rafa Content Studio</h1>
           <p class="subtle">Scan an iCloud album folder, generate draft captions, then approve or reject posts before anything goes live.</p>
         </div>
-        <form method="post" action="/api/scan">
-          <button type="submit">Scan iCloud Album</button>
-        </form>
+        <div class="hero-actions">
+          <form method="post" action="/api/scan">
+            <button type="submit">Scan iCloud Album</button>
+          </form>
+          <a class="button secondary" href="/exports/approved.json">Export JSON</a>
+          <a class="button secondary" href="/exports/approved.csv">Export CSV</a>
+        </div>
       </section>
 
       <section class="config-card">
@@ -27,7 +31,7 @@
       <section class="grid">
         {% for item in items %}
           <article class="card">
-            <div class="thumb {{ item.media_type }}">{{ item.media_type }}</div>
+            <img class="thumb {{ item.media_type }}" src="{{ item.thumbnail_url }}" alt="Preview for {{ item.filename }}">
             <div class="card-body">
               <div class="row">
                 <h2>{{ item.filename }}</h2>

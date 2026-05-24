@@ -17,6 +17,14 @@ class StudioSettings:
         "RAFA_STUDIO_DB",
         str(Path.home() / ".rafa-content-studio" / "studio.sqlite3"),
     )
+    thumbnail_dir: str = os.environ.get(
+        "RAFA_THUMBNAIL_DIR",
+        str(Path.home() / ".rafa-content-studio" / "thumbnails"),
+    )
+    export_dir: str = os.environ.get(
+        "RAFA_EXPORT_DIR",
+        str(Path.home() / ".rafa-content-studio" / "exports"),
+    )
 
     @property
     def media_path(self) -> Path:
@@ -25,3 +33,11 @@ class StudioSettings:
     @property
     def db_path(self) -> Path:
         return Path(self.database_path).expanduser()
+
+    @property
+    def thumbnail_path(self) -> Path:
+        return Path(self.thumbnail_dir).expanduser()
+
+    @property
+    def export_path(self) -> Path:
+        return Path(self.export_dir).expanduser()

@@ -12,9 +12,22 @@ Local-first MVP for turning a Rafa iCloud album folder into reviewable content d
 
 ## Run locally
 
+### Option A: with uv
+
 ```bash
 cd /home/tejas/workspace/rafa-content-studio
 uv run --extra dev uvicorn rafa_studio.app:app --reload
+```
+
+### Option B: with standard Python venv
+
+```bash
+cd /home/tejas/workspace/rafa-content-studio
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+uvicorn rafa_studio.app:app --reload
 ```
 
 Open http://127.0.0.1:8000.
@@ -30,10 +43,23 @@ uv run --extra dev uvicorn rafa_studio.app:app --reload
 
 If the iCloud album is visible through Photos but not as normal files, export/sync the album into a regular folder for the MVP. The app intentionally watches a normal filesystem path so it does not need Apple Photos private database access.
 
-## Optional database location
+## Optional database and output locations
 
 ```bash
 export RAFA_STUDIO_DB="$HOME/.rafa-content-studio/studio.sqlite3"
+export RAFA_THUMBNAIL_DIR="$HOME/.rafa-content-studio/thumbnails"
+export RAFA_EXPORT_DIR="$HOME/.rafa-content-studio/exports"
+```
+
+## Export approved drafts
+
+From the dashboard, use **Export JSON** or **Export CSV** after approving drafts.
+
+From the CLI:
+
+```bash
+rafa-studio export-approved --format json
+rafa-studio export-approved --format csv
 ```
 
 ## Test
