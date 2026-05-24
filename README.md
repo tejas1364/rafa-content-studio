@@ -74,6 +74,14 @@ rafa-studio generate-batch \
   --trend "Weekend photo dump but make it tiny"
 ```
 
+Or save researched ideas in a text file, one per line:
+
+```bash
+rafa-studio generate-batch --trends-file today-trends.txt
+```
+
+The dashboard also has a text area for pasting four researched trend ideas before generation.
+
 The generator requires at least 3 videos and 3 photos. It creates exactly 3 video posts and 1 slideshow post for human approval.
 
 ## Export approved drafts

@@ -77,10 +77,32 @@ button:hover, .button:hover {
 }
 
 .hero-actions {
-  align-items: flex-end;
+  align-items: stretch;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: min(360px, 100%);
+}
+
+.trend-form {
+  display: grid;
+  gap: 8px;
+}
+
+.trend-form label {
+  color: #5f341c;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.trend-form textarea {
+  background: #fffaf5;
+  border: 1px solid #dcb99f;
+  border-radius: 16px;
+  color: #211914;
+  font: inherit;
+  padding: 12px;
+  resize: vertical;
 }
 
 .config-card, .empty, .card {

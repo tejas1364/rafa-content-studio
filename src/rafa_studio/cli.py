@@ -27,6 +27,10 @@ def main(argv: list[str] | None = None) -> int:
         dest="trends",
         help="Trend idea to use. Pass four times to override the MVP defaults.",
     )
+    generate_parser.add_argument(
+        "--trends-file",
+        help="Plain text file with researched trend ideas, one per line.",
+    )
 
     export_parser = subparsers.add_parser("export-approved", help="Export approved post drafts")
     export_parser.add_argument("--format", choices=["json", "csv"], default="json")
@@ -43,7 +47,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == "generate-batch":
-        batch = generate_daily_batch(store, ManualTrendProvider(args.trends))
+        trends = args.trends
+        if args.trends_file:
+            trends_path = Path(args.trends_file).expanduser()
+            trends = [
+                line.strip(" -\t")
+                for line in trends_path.read_text(encoding="utf-8").splitlines()
+                if line.strip(" -\t")
+            ]
+        batch = generate_daily_batch(store, ManualTrendProvider(trends))
         print(f"Generated {batch.id} with {batch.target_post_count} post drafts")
         return 0
 

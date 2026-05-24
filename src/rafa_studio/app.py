@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -60,8 +60,8 @@ def create_app(settings: StudioSettings | None = None, store: ContentStore | Non
         return {"assets_imported": imported, "media_dir": str(settings.media_path)}
 
     @app.post("/api/batches/generate")
-    def generate_batch(input: TrendInput | None = None) -> dict[str, str | int]:
-        trends = input.trends if input and input.trends else None
+    def generate_batch(trends_text: str = Form(default="")) -> dict[str, str | int]:
+        trends = _parse_trends_text(trends_text)
         try:
             batch = generate_daily_batch(store, ManualTrendProvider(trends))
         except ValueError as error:
@@ -197,6 +197,11 @@ def _legacy_draft_to_response(store: ContentStore, draft_id: str, status: str) -
         "caption": draft.caption,
         "status": draft.status,
     }
+
+
+def _parse_trends_text(trends_text: str) -> list[str] | None:
+    trends = [line.strip(" -\t") for line in trends_text.splitlines() if line.strip(" -\t")]
+    return trends[:4] or None
 
 
 @lru_cache(maxsize=1)

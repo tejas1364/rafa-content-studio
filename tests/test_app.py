@@ -56,6 +56,34 @@ def test_generate_batch_endpoint_creates_reviewable_post_drafts(tmp_path: Path):
     assert [post.post_type for post in posts].count("slideshow") == 1
 
 
+def test_generate_batch_accepts_researched_trends_from_dashboard_form(tmp_path: Path):
+    client, store = make_client(tmp_path)
+    client.post("/api/scan")
+
+    response = client.post(
+        "/api/batches/generate",
+        data={
+            "trends_text": "\n".join(
+                [
+                    "Tiny dog landlord inspection",
+                    "Zoomies chose violence today",
+                    "Quiet puppy suspicious activity",
+                    "Sunday Rafa photo dump",
+                ]
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    posts = store.list_post_drafts(response.json()["id"])
+    assert [post.trend_title for post in posts] == [
+        "Tiny dog landlord inspection",
+        "Zoomies chose violence today",
+        "Quiet puppy suspicious activity",
+        "Sunday Rafa photo dump",
+    ]
+
+
 def test_can_approve_and_reject_post_drafts(tmp_path: Path):
     client, store = make_client(tmp_path)
     client.post("/api/scan")
