@@ -55,6 +55,30 @@ def test_thumbnail_service_uses_svg_fallback_for_video_when_ffmpeg_cannot_decode
     assert "video" in thumbnail.path.read_text()
 
 
+def test_thumbnail_service_retries_stale_video_placeholder_when_frame_can_be_extracted(tmp_path: Path):
+    media_dir = tmp_path / "media"
+    media_dir.mkdir()
+    asset_path = media_dir / "zoomies.mp4"
+    asset_path.write_bytes(b"not decoded by this test")
+    asset = MediaAsset.from_path(asset_path, media_dir)
+    service = ThumbnailService(cache_dir=tmp_path / "cache")
+    stale_placeholder = tmp_path / "cache" / f"{asset.id}.svg"
+    stale_placeholder.write_text("stale video placeholder")
+
+    def fake_extract_video_thumbnail(_asset: MediaAsset, output_path: Path) -> bool:
+        Image.new("RGB", (80, 60), "blue").save(output_path, format="JPEG")
+        return True
+
+    service._try_video_thumbnail = fake_extract_video_thumbnail  # type: ignore[method-assign]
+
+    thumbnail = service.ensure_thumbnail(asset)
+
+    assert thumbnail.relative_url == f"/thumbnails/{asset.id}.jpg"
+    assert thumbnail.path.suffix == ".jpg"
+    assert thumbnail.path.exists()
+    assert not stale_placeholder.exists()
+
+
 def test_thumbnail_service_reuses_existing_preview(tmp_path: Path):
     media_dir = tmp_path / "media"
     media_dir.mkdir()

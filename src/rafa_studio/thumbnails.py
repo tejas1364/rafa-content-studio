@@ -36,12 +36,17 @@ class ThumbnailService:
 
         if jpg_path.exists():
             return Thumbnail(path=jpg_path, relative_url=f"/thumbnails/{asset.id}.jpg")
-        if svg_path.exists():
+
+        if asset.media_type == "video":
+            if self._try_video_thumbnail(asset, jpg_path):
+                svg_path.unlink(missing_ok=True)
+                return Thumbnail(path=jpg_path, relative_url=f"/thumbnails/{asset.id}.jpg")
+            if svg_path.exists():
+                return Thumbnail(path=svg_path, relative_url=f"/thumbnails/{asset.id}.svg")
+        elif svg_path.exists():
             return Thumbnail(path=svg_path, relative_url=f"/thumbnails/{asset.id}.svg")
 
         if asset.media_type == "photo" and self._try_photo_thumbnail(asset, jpg_path):
-            return Thumbnail(path=jpg_path, relative_url=f"/thumbnails/{asset.id}.jpg")
-        if asset.media_type == "video" and self._try_video_thumbnail(asset, jpg_path):
             return Thumbnail(path=jpg_path, relative_url=f"/thumbnails/{asset.id}.jpg")
 
         svg_path.write_text(_placeholder_svg(asset), encoding="utf-8")
